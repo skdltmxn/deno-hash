@@ -23,8 +23,8 @@ async function buildWasm(path: string) {
   }
 }
 
-// 2. compress wasm
-async function compressWasm(wasmPath: string) {
+// 2. encode wasm
+async function encodeWasm(wasmPath: string) {
   const wasm = await Deno.readFile(`${wasmPath}/deno_hash_bg.wasm`);
   return base64Encode(wasm);
 }
@@ -59,5 +59,5 @@ async function generate(wasm: string, output: string) {
 const OUTPUT_DIR = "./out";
 
 await buildWasm(OUTPUT_DIR);
-const wasm = await compressWasm(OUTPUT_DIR);
+const wasm = await encodeWasm(OUTPUT_DIR);
 await generate(wasm, OUTPUT_DIR);
