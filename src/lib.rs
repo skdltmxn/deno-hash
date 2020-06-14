@@ -4,12 +4,12 @@ use digest::{Digest, DynDigest};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub struct Hash {
+pub struct DenoHash {
     inner: Box<dyn DynDigest>,
 }
 
 #[wasm_bindgen]
-pub fn create_hash(algorithm: &str) -> Result<Hash, JsValue> {
+pub fn create_hash(algorithm: &str) -> Result<DenoHash, JsValue> {
     let hash: Option<Box<dyn DynDigest>> = match algorithm {
         "md2" => Some(Box::new(md2::Md2::new())),
         "md4" => Some(Box::new(md4::Md4::new())),
@@ -33,7 +33,7 @@ pub fn create_hash(algorithm: &str) -> Result<Hash, JsValue> {
     };
 
     if let Some(h) = hash {
-        Ok(Hash { inner: h })
+        Ok(DenoHash { inner: h })
     } else {
         let err_msg = format!("unsupported hash algorithm: {}", algorithm);
         Err(JsValue::from_str(&err_msg))
@@ -41,11 +41,11 @@ pub fn create_hash(algorithm: &str) -> Result<Hash, JsValue> {
 }
 
 #[wasm_bindgen]
-pub fn update_hash(hash: &mut Hash, data: &[u8]) {
+pub fn update_hash(hash: &mut DenoHash, data: &[u8]) {
     hash.inner.input(data)
 }
 
 #[wasm_bindgen]
-pub fn digest_hash(hash: Hash) -> Box<[u8]> {
-    hash.inner.result()
+pub fn digest_hash(hash: &mut DenoHash) -> Box<[u8]> {
+    hash.inner.result_reset()
 }

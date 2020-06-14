@@ -7,7 +7,7 @@ import init, {
   create_hash as create_hash_wasm,
   update_hash as update_hash_wasm,
   digest_hash as digest_hash_wasm,
-} from "./deno_hash_wasm.js";
+} from "./out/wasm.js";
 
 await init(source);
 

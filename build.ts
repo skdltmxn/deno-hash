@@ -1,7 +1,6 @@
 // Copyright 2020 skdltmxn. All rights reserved.
 
 import { encode as base64Encode } from "https://deno.land/std@0.57.0/encoding/base64.ts";
-import { compress } from "https://deno.land/x/lz4@v0.1.1/mod.ts";
 import Terser from "https://cdn.pika.dev/terser@^4.7.0";
 
 // 1. build wasm
@@ -27,22 +26,22 @@ async function buildWasm(path: string) {
 // 2. compress wasm
 async function compressWasm(wasmPath: string) {
   const wasm = await Deno.readFile(`${wasmPath}/deno_hash_bg.wasm`);
-  return base64Encode(compress(wasm));
+  return base64Encode(wasm);
 }
 
 // 3. generate script
 async function generate(wasm: string, output: string) {
   const initScript = await Deno.readTextFile(`${output}/deno_hash.js`);
   const denoHashScript =
-    `import * as lz4 from "https://deno.land/x/lz4@v0.1.1/mod.ts";` +
-    `export const source = lz4.decompress(Uint8Array.from(atob("${wasm}"), c => c.charCodeAt(0)));` +
+    `import * as base64 from "https://deno.land/std@0.57.0/encoding/base64.ts";` +
+    `export const source = base64.decode("${wasm}");` +
     initScript;
 
   const minified = Terser.minify(denoHashScript, {
     mangle: { toplevel: true, module: true },
     output: {
       ecma: "2015",
-      preamble: "//deno-fmt-ignore-file",
+      preamble: "/* eslint-disable */\n//deno-fmt-ignore-file",
     },
   });
 
@@ -52,8 +51,8 @@ async function generate(wasm: string, output: string) {
   }
 
   await Deno.writeFile(
-    `${output}/deno_hash_wasm.js`,
-    new TextEncoder().encode(minified.code)
+    `${output}/wasm.js`,
+    new TextEncoder().encode(minified.code),
   );
 }
 
